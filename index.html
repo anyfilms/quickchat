@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickChat - Random Video Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --dark-color: #202124;
+            --light-color: #f8f9fa;
+            --gray-color: #5f6368;
+            --border-color: #dadce0;
+        }
+
+        body {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            background: linear-gradient(90deg, #1a73e8, #34a853);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--light-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links a.active {
+            background-color: var(--primary-color);
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Video Chat Section */
+        .video-chat-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .video-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            height: 500px;
+        }
+
+        .video-box {
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+        }
+
+        .video-placeholder i {
+            font-size: 80px;
+            color: var(--gray-color);
+            margin-bottom: 20px;
+        }
+
+        .video-placeholder p {
+            color: var(--light-color);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .video-label {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .control-btn.disconnect {
+            background-color: var(--danger-color);
+        }
+
+        .control-btn.settings {
+            background-color: var(--gray-color);
+        }
+
+        /* Interests Section */
+        .interests-section {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .interests-section h2 {
+            margin-bottom: 15px;
+            font-size: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .interests-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .interest-tag {
+            background-color: rgba(26, 115, 232, 0.2);
+            color: #8ab4f8;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(26, 115, 232, 0.3);
+        }
+
+        .interest-tag:hover {
+            background-color: rgba(26, 115, 232, 0.4);
+        }
+
+        .interest-tag.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .interest-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .interest-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .interest-input input::placeholder {
+            color: #aaa;
+        }
+
+        .interest-input button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interest-input button:hover {
+            background-color: #2e8b47;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(26, 115, 232, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            color: var(--primary-color);
+        }
+
+        .stat-info h3 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .stat-info p {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--dark-color);
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .settings-option {
+            margin-bottom: 20px;
+        }
+
+        .settings-option label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .settings-option select, .settings-option input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .modal-btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background-color: transparent;
+            color: var(--light-color);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Footer */
+        footer {
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .copyright {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .video-container {
+                grid-template-columns: 1fr;
+                height: 350px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .controls {
+                gap: 15px;
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Connection Status */
+        .connection-status {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--danger-color);
+        }
+
+        .status-dot.connected {
+            background-color: var(--secondary-color);
+        }
+
+        .status-dot.searching {
+            background-color: #fbbc05;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-video"></i>
+            <h1>QuickChat</h1>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">वीडियो चैट</a>
+            <a href="#">टेक्स्ट चैट</a>
+            <a href="#">नियम</a>
+            <a href="#">सुरक्षा</a>
+            <a href="#">मदद</a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Video Chat Section -->
+        <section class="video-chat-section">
+            <div class="video-container">
+                <!-- Local Video -->
+                <div class="video-box">
+                    <div class="video-placeholder" id="localVideoPlaceholder">
+                        <i class="fas fa-user"></i>
+                        <p>आपका वीडियो</p>
+                    </div>
+                    <div class="video-label">आप</div>
+                    <div class="loading" id="localLoading">
+                        <div class="loading-spinner"></div>
+                        <p>वीडियो लोड हो रहा है...</p>
+                    </div>
+                </div>
+                
+                <!-- Remote Video -->
+                <div class="video-box">
+                    <div class="video-placeholder" id="remoteVideoPlaceholder">
+                        <i class="fas fa-user-friends"></i>
+                        <p>साथी की प्रतीक्षा कर रहे हैं...</p>
+                    </div>
+                    <div class="video-label">अनजान साथी</div>
+                    <div class="loading" id="remoteLoading">
+                        <div class="loading-spinner"></div>
+                        <p>साथी ढूंढ रहे हैं...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">डिस्कनेक्टेड</span>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" id="startBtn" title="नया कनेक्शन शुरू करें">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="control-btn" id="stopBtn" title="कनेक्शन बंद करें" disabled>
+                    <i class="fas fa-stop"></i>
+                </button>
+                <button class="control-btn disconnect" id="disconnectBtn" title="वर्तमान चैट बंद करें" disabled>
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+                <button class="control-btn" id="nextBtn" title="अगले साथी से जुड़ें" disabled>
+                    <i class="fas fa-forward"></i>
+                </button>
+                <button class="control-btn settings" id="settingsBtn" title="सेटिंग्स">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Interests Section -->
+        <section class="interests-section">
+            <h2><i class="fas fa-tags"></i> अपनी रुचियां चुनें</h2>
+            <div class="interests-container" id="interestsContainer">
+                <!-- Interests will be added here by JavaScript -->
+            </div>
+            <div class="interest-input">
+                <input type="text" id="newInterest" placeholder="अपनी रुचि जोड़ें (उदाहरण: संगीत, खेल, फिल्में)">
+                <button id="addInterestBtn">जोड़ें</button>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="onlineCount">12,845</h3>
+                    <p>ऑनलाइन उपयोगकर्ता</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="chatCount">5,231</h3>
+                    <p>सक्रिय चैट</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="countryCount">127</h3>
+                    <p>देश</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> सेटिंग्स</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <div class="settings-option">
+                <label for="cameraSelect">कैमरा चुनें</label>
+                <select id="cameraSelect">
+                    <option value="default">डिफ़ॉल्ट कैमरा</option>
+                </select>
+            </div>
+            
+            <div class="settings-option">
+                <label for="micSelect">माइक्रोफोन चुनें</label>
+                <select id="micSelect">
+                    <option value="default">डिफ़ॉल्ट माइक्रोफोन</option>
+                </select>
+            </div>
+            
+            <div class="settings-option">
+                <label for="languageSelect">भाषा</label>
+                <select id="languageSelect">
+                    <option value="hi">हिन्दी</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                </select>
+            </div>
+            
+            <div class="settings-option">
+                <label for="ageFilter">आयु सीमा</label>
+                <select id="ageFilter">
+                    <option value="any">कोई भी</option>
+                    <option value="18-25">18-25</option>
+                    <option value="26-35">26-35</option>
+                    <option value="36+">36+</option>
+                </select>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="cancelSettings">रद्द करें</button>
+                <button class="modal-btn primary" id="saveSettings">सेटिंग्स सहेजें</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="#">गोपनीयता नीति</a>
+            <a href="#">सेवा की शर्तें</a>
+            <a href="#">कुकीज़</a>
+            <a href="#">सामग्री नीति</a>
+            <a href="#">हमसे संपर्क करें</a>
+        </div>
+        <p class="copyright">© 2023 QuickChat. सर्वाधिकार सुरक्षित। यह वेबसाइट केवल प्रदर्शन के लिए है।</p>
+        <p class="copyright"><strong>चेतावनी:</strong> अजनबियों के साथ बातचीत करते समय सावधानी बरतें। व्यक्तिगत जानकारी साझा न करें।</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const localVideoPlaceholder = document.getElementById('localVideoPlaceholder');
+        const remoteVideoPlaceholder = document.getElementById('remoteVideoPlaceholder');
+        const localLoading = document.getElementById('localLoading');
+        const remoteLoading = document.getElementById('remoteLoading');
+        const interestsContainer = document.getElementById('interestsContainer');
+        const newInterestInput = document.getElementById('newInterest');
+        const addInterestBtn = document.getElementById('addInterestBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelSettings = document.getElementById('cancelSettings');
+        const saveSettings = document.getElementById('saveSettings');
+        const onlineCount = document.getElementById('onlineCount');
+        const chatCount = document.getElementById('chatCount');
+        const countryCount = document.getElementById('countryCount');
+
+        // State variables
+        let isConnected = false;
+        let isSearching = false;
+        let selectedInterests = [];
+        let onlineUsers = 12845;
+        let activeChats = 5231;
+        let countries = 127;
+
+        // Predefined interests
+        const interests = [
+            "संगीत", "फिल्में", "खेल", "टेक्नोलॉजी", "यात्रा", 
+            "पढ़ाई", "खाना", "कला", "फोटोग्राफी", "गेमिंग",
+            "फैशन", "फिटनेस", "राजनीति", "विज्ञान", "जानवर"
+        ];
+
+        // Initialize the page
+        function init() {
+            // Initialize interests
+            renderInterests();
+            
+            // Update stats with random fluctuations
+            updateStats();
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        // Render interests to the page
+        function renderInterests() {
+            interestsContainer.innerHTML = '';
+            
+            interests.forEach(interest => {
+                const interestTag = document.createElement('div');
+                interestTag.className = 'interest-tag';
+                interestTag.textContent = interest;
+                interestTag.addEventListener('click', () => {
+                    interestTag.classList.toggle('active');
+                    
+                    if (interestTag.classList.contains('active')) {
+                        selectedInterests.push(interest);
+                    } else {
+                        selectedInterests = selectedInterests.filter(item => item !== interest);
+                    }
+                    
+                    console.log('Selected interests:', selectedInterests);
+                });
+                
+                interestsContainer.appendChild(interestTag);
+            });
+        }
+
+        // Update stats with random fluctuations
+        function updateStats() {
+            // Simulate changing stats
+            setInterval(() => {
+                onlineUsers += Math.floor(Math.random() * 21) - 10;
+                activeChats += Math.floor(Math.random() * 11) - 5;
+                
+                // Ensure numbers don't go too low
+                onlineUsers = Math.max(12000, onlineUsers);
+                activeChats = Math.max(5000, activeChats);
+                
+                onlineCount.textContent = onlineUsers.toLocaleString();
+                chatCount.textContent = activeChats.toLocaleString();
+            }, 5000);
+            
+            // Initial display
+            onlineCount.textContent = onlineUsers.toLocaleString();
+            chatCount.textContent = activeChats.toLocaleString();
+            countryCount.textContent = countries.toLocaleString();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Start button
+            startBtn.addEventListener('click', startConnection);
+            
+            // Stop button
+            stopBtn.addEventListener('click', stopConnection);
+            
+            // Disconnect button
+            disconnectBtn.addEventListener('click', disconnectChat);
+            
+            // Next button
+            nextBtn.addEventListener('click', nextPartner);
+            
+            // Settings button
+            settingsBtn.addEventListener('click', () => {
+                settingsModal.style.display = 'flex';
+            });
+            
+            // Close modal buttons
+            closeModal.addEventListener('click', () => {
+                settingsModal.style.display = 'none';
+            });
+            
+            cancelSettings.addEventListener('click', () => {
+                settingsModal.style.display = 'none';
+            });
+            
+            // Save settings
+            saveSettings.addEventListener('click', () => {
+                alert('सेटिंग्स सहेजी गईं!');
+                settingsModal.style.display = 'none';
+            });
+            
+            // Add interest
+            addInterestBtn.addEventListener('click', addInterest);
+            newInterestInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addInterest();
+                }
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                }
+            });
+        }
+
+        // Start connection
+        function startConnection() {
+            if (isSearching) return;
+            
+            isSearching = true;
+            updateStatus('searching', 'साथी ढूंढ रहे हैं...');
+            
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            nextBtn.disabled = true;
+            
+            // Show loading for remote video
+            remoteLoading.style.display = 'block';
+            remoteVideoPlaceholder.innerHTML = '';
+            
+            // Simulate finding a partner after a delay
+            setTimeout(() => {
+                // Simulate success rate (80%)
+                if (Math.random() < 0.8) {
+                    connectToPartner();
+                } else {
+                    // Simulate failure
+                    updateStatus('disconnected', 'कोई साथी नहीं मिला। पुनः प्रयास करें।');
+                    isSearching = false;
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    remoteLoading.style.display = 'none';
+                    remoteVideoPlaceholder.innerHTML = `
+                        <i class="fas fa-user-friends"></i>
+                        <p>साथी की प्रतीक्षा कर रहे हैं...</p>
+                    `;
+                }
+            }, 2000 + Math.random() * 3000);
+        }
+
+        // Stop connection
+        function stopConnection() {
+            isSearching = false;
+            isConnected = false;
+            
+            updateStatus('disconnected', 'डिस्कनेक्टेड');
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            disconnectBtn.disabled = true;
+            nextBtn.disabled = true;
+            
+            // Reset video placeholders
+            remoteLoading.style.display = 'none';
+            remoteVideoPlaceholder.innerHTML = `
+                <i class="fas fa-user-friends"></i>
+                <p>साथी की प्रतीक्षा कर रहे हैं...</p>
+            `;
+            
+            // Update stats
+            activeChats = Math.max(5000, activeChats - 1);
+            chatCount.textContent = activeChats.toLocaleString();
+        }
+
+        // Connect to a partner
+        function connectToPartner() {
+            isSearching = false;
+            isConnected = true;
+            
+            updateStatus('connected', 'कनेक्टेड');
+            
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            disconnectBtn.disabled = false;
+            nextBtn.disabled = false;
+            
+            // Hide loading and show connected state
+            remoteLoading.style.display = 'none';
+            remoteVideoPlaceholder.innerHTML = `
+                <i class="fas fa-user-check" style="color: #34a853;"></i>
+                <p>साथी से जुड़े! हैलो कहें!</p>
+            `;
+            
+            // Update stats
+            activeChats += 1;
+            chatCount.textContent = activeChats.toLocaleString();
+        }
+
+        // Disconnect chat
+        function disconnectChat() {
+            if (!isConnected) return;
+            
+            isConnected = false;
+            updateStatus('disconnected', 'चैट बंद की गई');
+            
+            disconnectBtn.disabled = true;
+            nextBtn.disabled = true;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            // Reset remote video placeholder
+            remoteVideoPlaceholder.innerHTML = `
+                <i class="fas fa-user-friends"></i>
+                <p>साथी की प्रतीक्षा कर रहे हैं...</p>
+            `;
+            
+            // Update stats
+            activeChats = Math.max(5000, activeChats - 1);
+            chatCount.textContent = activeChats.toLocaleString();
+        }
+
+        // Next partner
+        function nextPartner() {
+            if (!isConnected) return;
+            
+            disconnectChat();
+            
+            // Immediately start searching again
+            setTimeout(() => {
+                startConnection();
+            }, 500);
+        }
+
+        // Add a new interest
+        function addInterest() {
+            const interest = newInterestInput.value.trim();
+            
+            if (interest && !interests.includes(interest)) {
+                interests.push(interest);
+                renderInterests();
+                newInterestInput.value = '';
+                
+                // Highlight the newly added interest
+                const interestTags = document.querySelectorAll('.interest-tag');
+                interestTags[interestTags.length - 1].classList.add('active');
+                selectedInterests.push(interest);
+            }
+        }
+
+        // Update connection status
+        function updateStatus(status, text) {
+            statusText.textContent = text;
+            
+            // Remove all status classes
+            statusDot.classList.remove('connected', 'searching');
+            
+            // Add appropriate class
+            if (status === 'connected') {
+                statusDot.classList.add('connected');
+            } else if (status === 'searching') {
+                statusDot.classList.add('searching');
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
